@@ -19,6 +19,10 @@ extension Data {
         return [UInt8](self)
     }
     
+    func toString() -> String? {
+        return String(data: self, encoding: String.Encoding.utf8) as String!
+    }
+    
     func toHexString() -> [String] {
         let byteBuffer = toByteBuffer();
         var s = [String](repeating: "", count: byteBuffer.count)
@@ -197,8 +201,23 @@ extension Data {
         return value
     }
     
-    func sub(in range: ClosedRange<Index>) -> Data {
-        return subdata(in: range.lowerBound ..< range.upperBound + 1)
+    func sub(in range: ClosedRange<Index>) -> Data? {
+        let startPos = range.lowerBound
+        let num = range.upperBound - range.lowerBound + 1
+        
+        if (startPos < 0 || num <= 0) {
+            return nil
+        }
+        
+        var endPos = 0
+        
+        if (startPos + num > self.count) {
+            endPos = self.count
+        } else {
+            endPos = startPos + num
+        }
+        
+        return subdata(in: startPos ..< endPos)
     }
     
     func merge(other : Data) -> Data {
