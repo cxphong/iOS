@@ -94,12 +94,16 @@ class TimeUtils: NSObject {
         return TimeZone.current.identifier
     }
     
-    class func offset(date1: Date, date2: Date) {
-        
+    class func offset(date1: Date, date2: Date) -> Int {
+        return Int(date2.timeIntervalSince1970 - date1.timeIntervalSince1970)
     }
     
-    class func datePlusOffset(date: Date, offset: Int) {
-        
+    class func datePlusOffset(date: Date, offset: Int) -> Date {
+        return date.addingTimeInterval(TimeInterval(offset))
+    }
+    
+    class func epochToDate(epoch: Int) -> Date {
+        return Date(timeIntervalSince1970: TimeInterval(epoch))
     }
     
 }
