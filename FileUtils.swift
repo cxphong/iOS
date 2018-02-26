@@ -10,22 +10,25 @@ import UIKit
 
 class FileUtils: NSObject {
 
-    class func listDocumentsFiles() -> NSMutableArray {
-        var files = NSMutableArray()
+    class func listDocumentsFiles() -> [URL]? {
+        var urls : [URL]?
         
         // Get the document directory url
-        let documentsUrl =  FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let documentsUrl =  getDocumentRootPath()
         
         do {
             // Get the directory contents urls (including subfolders urls)
-            files = try FileManager.default.contentsOfDirectory(at: documentsUrl, includingPropertiesForKeys: nil, options: []) as! NSMutableArray
-           // print(directoryContents)
+            urls = try FileManager.default.contentsOfDirectory(at: documentsUrl, includingPropertiesForKeys: nil, options: [])
             
         } catch let error as NSError {
             print(error.localizedDescription)
         }
         
-        return files
+        return urls
+    }
+    
+    class func getDocumentRootPath() -> URL {
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     }
     
     class func getFileSize(_ url : URL) -> Int {
@@ -59,4 +62,43 @@ class FileUtils: NSObject {
             return ""
         }
     }
+    
+    class func saveTextFile(text: String, path: String) -> Bool {
+        let url = getDocumentRootPath().appendingPathComponent(path)
+        let r = FileManager.default.createFile(atPath: url.path,
+                                               contents: Data.stringToData(text),
+                                               attributes: nil)
+        return r
+    }
+    
+    class func readTextFile(path: String) -> String? {
+        let url = getDocumentRootPath().appendingPathComponent(path)
+        return FileManager.default.contents(atPath: url.path)?.toString()
+    }
+    
+    class func appendTextFile(text: String, path: String) -> Bool {
+        let url = getDocumentRootPath().appendingPathComponent(path)
+        let fileHandler = FileHandle(forUpdatingAtPath: url.path)
+        
+        if (fileHandler == nil) {
+            return false
+        }
+        
+        fileHandler?.seekToEndOfFile()
+        fileHandler?.write(Data.stringToData(text))
+        fileHandler?.closeFile()
+        
+        return true
+    }
+    
+    class func deleteFile(path: String) {
+        let url = getDocumentRootPath().appendingPathComponent(path)
+        
+        do {
+            try FileManager.default.removeItem(at: url)
+        } catch {
+            
+        }
+    }
+    
 }
